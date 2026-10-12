@@ -1,6 +1,7 @@
 import { Button } from "@/components/ui/button";
 import { ArrowRight } from "lucide-react";
 import Image from "next/image";
+import Link from "next/link";
 
 export default function Home() {
   return (
@@ -16,12 +17,51 @@ export default function Home() {
               Capture, organize, and manage your job search in one place.
             </p>
             <div className="flex flex-col items-center gap-4">
-              <Button className="h-12 px-8 text-lg font-medium" size="lg">
-                Start for free <ArrowRight className="ml-2" />
-              </Button>
+              <Link href={"/sign-up"}>
+                <Button className="h-12 px-8 text-lg font-medium" size="lg">
+                  Start for free <ArrowRight className="ml-2" />
+                </Button>
+              </Link>
               <p className="text-sm text-muted-foreground">
                 Free forever. No Credit card required
               </p>
+            </div>
+          </div>
+        </section>
+
+        {/* Hero Image Section with Tabs */}
+        <section className="border-t bg-white py-16">
+          <div className="container mX-auto px-4">
+            <div className="mx-auto max-w-6xl">
+              {/* Tabs */}
+              <div className="flex justify-center gap-2 mb-8">
+                <Button>Organize Application</Button>
+                <Button>Get Hired</Button>
+                <Button>Manage Boards</Button>
+              </div>
+
+              <div className="relative mx-auto max-w-5xl overflow-hidden rounded-lg border border-gray-200 shadow-xl">
+                <Image
+                  src={"/hero-images/hero1.png"}
+                  alt="organize application"
+                  width={1200}
+                  height={800}
+                />
+
+                <Image
+                  src={"/hero-images/hero2.png"}
+                  alt="organize application"
+                  width={1200}
+                  height={800}
+                />
+
+                <Image
+                  src={"/hero-images/hero3.png"}
+                  alt="organize application"
+                  width={1200}
+                  height={800}
+                />
+              </div>
             </div>
           </div>
         </section>
