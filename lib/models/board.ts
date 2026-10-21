@@ -8,6 +8,8 @@ export interface IBoard extends Document {
   updatedAt: Date;
 }
 
+// board -> column -> job application
+
 const BoardSchema = new Schema<IBoard>(
   {
     name: {
