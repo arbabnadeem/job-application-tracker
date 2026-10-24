@@ -45,7 +45,7 @@ export const initializeUserBoard = async (userId: string) => {
     // create default column
     const columns = await Promise.all(
       DEFAULT_COLUMNS.map((col) => {
-        Column.create({
+        return Column.create({
           name: col.name,
           order: col.order,
           boardId: board._id,
