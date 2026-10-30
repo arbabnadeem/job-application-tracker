@@ -43,7 +43,8 @@ const KanbanBoard = ({ board, userId }: KanbanBoardProps) => {
               color: "bg-cyan-500",
               icon: <Calendar className="h-4 w-4" />,
             };
-            return <></>;
+            return <>
+            <div></div></>;
           })}
         </div>
       </div>
