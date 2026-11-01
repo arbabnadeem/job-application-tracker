@@ -1,11 +1,13 @@
 import KanbanBoard from "@/components/kanban-board";
 import { getSession } from "@/lib/auth/auth";
 import connectDB from "@/lib/db";
+import { initializeUserBoard } from "@/lib/init-user-board";
 import { Board } from "@/lib/models";
-import { json } from "better-auth";
 import { redirect } from "next/navigation";
 
-const page = async () => {
+export const instant = false;
+
+const DashboardPage = async () => {
   const session = await getSession();
 
   if (!session?.user) {
@@ -14,29 +16,36 @@ const page = async () => {
 
   await connectDB();
 
-  const board = await Board.findOne({
+  let board = await Board.findOne({
     userId: session.user.id,
     name: "Job Hunt",
   }).populate({
     path: "columns",
   });
 
-  console.log(board);
+  if (!board) {
+    const initialized = await initializeUserBoard(session.user.id);
+    board = await Board.findById(initialized._id).populate({
+      path: "columns",
+    });
+  }
 
   return (
     <div className="min-h-screen bg-white">
-      <div className="container max-auto p-6">
+      <div className="container mx-auto p-6">
         <div className="mb-6">
-          <h1 className="text-3xl font-bold text-black">{board.name}</h1>
+          <h1 className="text-3xl font-bold text-black">{board?.name ?? "Job Hunt"}</h1>
           <p className="text-gray-600">Track your job applications</p>
         </div>
-        <KanbanBoard
-          board={JSON.parse(JSON.stringify(board))}
-          userId={session.user.id}
-        />
+        {board && (
+          <KanbanBoard
+            board={JSON.parse(JSON.stringify(board))}
+            userId={session.user.id}
+          />
+        )}
       </div>
     </div>
   );
 };
 
-export default page;
+export default DashboardPage;

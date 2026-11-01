@@ -18,6 +18,7 @@ import {
   DropdownMenuTrigger,
 } from "./ui/dropdown-menu";
 import { Button } from "./ui/button";
+import CreateJobApplicationDialog from "./create-job-dialog";
 
 interface KanbanBoardProps {
   board: Board;
@@ -77,14 +78,16 @@ function DroppableColumn({
           </div>
 
           <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <Button
-                variant={"ghost"}
-                size={"icon"}
-                className={"h-6 w-6 text-white hover:bg-white/20"}
-              >
-                <MoreVertical className="h-4 w-4" />
-              </Button>
+            <DropdownMenuTrigger
+              render={
+                <Button
+                  variant={"ghost"}
+                  size={"icon"}
+                  className={"h-6 w-6 text-white hover:bg-white/20"}
+                />
+              }
+            >
+              <MoreVertical className="h-4 w-4" />
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end">
               <DropdownMenuItem className="text-destructive">
@@ -95,12 +98,14 @@ function DroppableColumn({
           </DropdownMenu>
         </div>
       </CardHeader>
-      <CardContent className="space-y-2 pt-4 bg-gray-50/50 min-h-[400px] rounded-b-lg"></CardContent>
+      <CardContent className="space-y-2 pt-4 bg-gray-50/50 min-h-[400px] rounded-b-lg">
+        <CreateJobApplicationDialog columnId={column._id} boardId={boardId} />
+      </CardContent>
     </Card>
   );
 }
 
-const KanbanBoard = ({ board, userId }: KanbanBoardProps) => {
+const KanbanBoard = ({ board }: KanbanBoardProps) => {
   const columns = board.columns;
 
   return (
