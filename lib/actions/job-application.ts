@@ -3,8 +3,9 @@
 import { getSession } from "@/lib/auth/auth";
 import connectDB from "../db";
 import { Board, Column, JobApplication } from "../models";
+import { revalidatePath } from "next/cache";
 
-interface JobApplicationData {
+export interface JobApplicationData {
   company: string;
   position: string;
   location?: string;
@@ -53,8 +54,7 @@ export const createJobApplication = async (data: JobApplicationData) => {
     return { error: "board not found" };
   }
 
-  // Verify column belong to board
-
+  // Verify column belongs to board
   const column = await Column.findOne({
     _id: columnId,
     boardId: boardId,
@@ -68,7 +68,7 @@ export const createJobApplication = async (data: JobApplicationData) => {
     ((await JobApplication.findOne({ columnId })
       .sort({ order: -1 })
       .select("order")
-      .lean()) as { order: number }) || null;
+      .lean()) as { order: number } | null) || null;
 
   const jobApplication = await JobApplication.create({
     company,
@@ -82,13 +82,15 @@ export const createJobApplication = async (data: JobApplicationData) => {
     columnId,
     boardId,
     userId: session.user.id,
-    status: "applied",
+    status: column.name.toLowerCase(),
     order: maxOrder ? maxOrder.order + 1 : 0,
   });
 
   await Column.findByIdAndUpdate(columnId, {
     $push: { jobApplication: jobApplication._id },
   });
+
+  revalidatePath("/dashboard");
 
   return {
     data: JSON.parse(JSON.stringify(jobApplication)),

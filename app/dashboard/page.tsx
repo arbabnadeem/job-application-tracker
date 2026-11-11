@@ -21,12 +21,18 @@ const DashboardPage = async () => {
     name: "Job Hunt",
   }).populate({
     path: "columns",
+    populate: {
+      path: "jobApplication",
+    },
   });
 
   if (!board) {
     const initialized = await initializeUserBoard(session.user.id);
     board = await Board.findById(initialized._id).populate({
       path: "columns",
+      populate: {
+        path: "jobApplication",
+      },
     });
   }
 
@@ -34,7 +40,9 @@ const DashboardPage = async () => {
     <div className="min-h-screen bg-white">
       <div className="container mx-auto p-6">
         <div className="mb-6">
-          <h1 className="text-3xl font-bold text-black">{board?.name ?? "Job Hunt"}</h1>
+          <h1 className="text-3xl font-bold text-black">
+            {board?.name ?? "Job Hunt"}
+          </h1>
           <p className="text-gray-600">Track your job applications</p>
         </div>
         {board && (
