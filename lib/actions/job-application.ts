@@ -154,11 +154,10 @@ export const updateJobApplication = async (
       $pull: { jobApplication: id },
     });
 
-    const jobInTargetColumn = await jobApplication
-      .find({
-        columnId: newColumnId,
-        _id: { $ne: id },
-      })
+    const jobInTargetColumn = await JobApplication.find({
+      columnId: newColumnId,
+      _id: { $ne: id },
+    })
       .sort({ order: 1 })
       .lean();
 
@@ -201,23 +200,23 @@ export const updateJobApplication = async (
     const currentPositionIndex = otherJobsInColumn.findIndex(
       (job) => job.order > currentJobOrder,
     );
-    const oldPositionindex =
+    const oldPositionIndex =
       currentPositionIndex === -1
         ? otherJobsInColumn.length
         : currentPositionIndex;
 
     const newOrderValue = order * 100;
 
-    if (order < oldPositionindex) {
-      const jobsToShiftDown = otherJobsInColumn.slice(order, oldPositionindex);
+    if (order < oldPositionIndex) {
+      const jobsToShiftDown = otherJobsInColumn.slice(order, oldPositionIndex);
 
       for (const job of jobsToShiftDown) {
         await JobApplication.findByIdAndUpdate(job._id, {
           $set: { order: job.order + 100 },
         });
       }
-    } else if (order > oldPositionindex) {
-      const jobsToShiftUp = otherJobsInColumn.slice(oldPositionindex, order);
+    } else if (order > oldPositionIndex) {
+      const jobsToShiftUp = otherJobsInColumn.slice(oldPositionIndex, order);
       for (const job of jobsToShiftUp) {
         const newOrder = Math.max(0, job.order - 100);
         await JobApplication.findByIdAndUpdate(job._id, {
@@ -226,10 +225,10 @@ export const updateJobApplication = async (
       }
     }
 
-    updatesToApply.order = newOrderValue;
+    updateToApply.order = newOrderValue;
   }
 
-  const updated = await JobApplication.findByIdAndUpdate(id, updatesToApply, {
+  const updated = await JobApplication.findByIdAndUpdate(id, updateToApply, {
     new: true,
   });
 
