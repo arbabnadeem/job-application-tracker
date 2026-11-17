@@ -21,6 +21,22 @@ import { Button } from "./ui/button";
 import CreateJobApplicationDialog from "./create-job-dialog";
 import JobApplicationCard from "./job-application-card";
 import { useBoard } from "@/lib/hooks/useBoards";
+import {
+  closestCorners,
+  DndContext,
+  DragStartEvent,
+  PointerSensor,
+  useDroppable,
+  useSensor,
+  useSensors,
+} from "@dnd-kit/core";
+import {
+  SortableContext,
+  useSortable,
+  verticalListSortingStrategy,
+} from "@dnd-kit/sortable";
+import { CSS } from "@dnd-kit/utilities";
+import { useState } from "react";
 
 interface KanbanBoardProps {
   board: Board;
@@ -66,6 +82,14 @@ function DroppableColumn({
   boardId: string;
   sortedColumns: Column[];
 }) {
+  const { setNodeRef, isOver } = useDroppable({
+    id: column._id,
+    data: {
+      type: "column",
+      columnId: column._id,
+    },
+  });
+
   const sortedJobs = [...(column.jobApplication || [])].sort(
     (a, b) => a.order - b.order,
   );
@@ -104,14 +128,23 @@ function DroppableColumn({
           </DropdownMenu>
         </div>
       </CardHeader>
-      <CardContent className="space-y-2 pt-4 bg-gray-50/50 min-h-[400px] rounded-b-lg">
-        {sortedJobs.map((job) => (
-          <SortableJobCard
-            key={job._id}
-            job={{ ...job, columnId: job.columnId || column._id }}
-            columns={sortedColumns}
-          />
-        ))}
+
+      <CardContent
+        ref={setNodeRef}
+        className={`space-y-2 pt-4 bg-gray-50/50 min-h-[400px] rounded-b-lg ${isOver ? "ring-2 ring-blue-500" : ""}`}
+      >
+        <SortableContext
+          items={sortedJobs.map((job) => job._id)}
+          strategy={verticalListSortingStrategy}
+        >
+          {sortedJobs.map((job) => (
+            <SortableJobCard
+              key={job._id}
+              job={{ ...job, columnId: job.columnId || column._id }}
+              columns={sortedColumns}
+            />
+          ))}
+        </SortableContext>
 
         <CreateJobApplicationDialog columnId={column._id} boardId={boardId} />
       </CardContent>
@@ -126,38 +159,85 @@ const SortableJobCard = ({
   job: JobApplication;
   columns: Column[];
 }) => {
+  const {
+    attributes,
+    listeners,
+    transform,
+    transition,
+    isDragging,
+    setNodeRef,
+  } = useSortable({
+    id: job._id,
+    data: {
+      type: "job",
+      job,
+    },
+  });
+
+  const style = {
+    transform: CSS.Transform.toString(transform),
+    transition,
+    opacity: isDragging ? 0.5 : 1,
+  };
+
   return (
-    <div>
-      <JobApplicationCard job={job} columns={columns} />
+    <div ref={setNodeRef} style={style}>
+      <JobApplicationCard
+        job={job}
+        columns={columns}
+        dargHandleProps={{ ...attributes, ...listeners }}
+      />
     </div>
   );
 };
 
 const KanbanBoard = ({ board }: KanbanBoardProps) => {
+  const [activeId, setActiveId] = useState<string | null>(null);
   const { columns, moveJob } = useBoard(board);
 
   const sortedColumns = [...(columns || [])].sort((a, b) => a.order - b.order);
 
+  const sensors = useSensors(
+    useSensor(PointerSensor, {
+      activationConstraint: {
+        distance: 8,
+      },
+    }),
+  );
+
+  const handleDragStart = async (event: DragStartEvent) => {
+    setActiveId(event.active.id as string);
+  };
+
+  const handleDragEnd = async () => {};
+
   return (
-    <div className="overflow-x-auto pb-4">
-      <div className="grid grid-cols-1 gap-4">
-        {sortedColumns.map((col, key) => {
-          const config = COLUMN_CONFIG[key] || {
-            color: "bg-cyan-500",
-            icon: <Calendar className="h-4 w-4" />,
-          };
-          return (
-            <DroppableColumn
-              key={col._id || key}
-              column={col}
-              config={config}
-              boardId={board._id}
-              sortedColumns={sortedColumns}
-            />
-          );
-        })}
+    <DndContext
+      sensors={sensors}
+      collisionDetection={closestCorners}
+      onDragStart={handleDragStart}
+      onDragEnd={handleDragEnd}
+    >
+      <div className="space-y-4">
+        <div className="flex gap-4 overflow-x-auto pb-4">
+          {sortedColumns.map((col, key) => {
+            const config = COLUMN_CONFIG[key] || {
+              color: "bg-cyan-500",
+              icon: <Calendar className="h-4 w-4" />,
+            };
+            return (
+              <DroppableColumn
+                key={col._id || key}
+                column={col}
+                config={config}
+                boardId={board._id}
+                sortedColumns={sortedColumns}
+              />
+            );
+          })}
+        </div>
       </div>
-    </div>
+    </DndContext>
   );
 };
 

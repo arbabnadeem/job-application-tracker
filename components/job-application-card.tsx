@@ -30,9 +30,14 @@ import { useState } from "react";
 interface JobApplicationCardProps {
   job: JobApplication;
   columns?: Column[];
+  dargHandleProps?: React.HTMLAttributes<HTMLElement>;
 }
 
-const JobApplicationCard = ({ job, columns = [] }: JobApplicationCardProps) => {
+const JobApplicationCard = ({
+  job,
+  columns = [],
+  dargHandleProps,
+}: JobApplicationCardProps) => {
   const [isEditing, setIsEditing] = useState(false);
   const [formData, setFormData] = useState({
     company: job.company,
@@ -65,7 +70,7 @@ const JobApplicationCard = ({ job, columns = [] }: JobApplicationCardProps) => {
     }
   };
 
-  const handleDelete = async (newColumnId: string) => {
+  const handleDelete = async () => {
     try {
       const result = await deleteJobApplication(job._id);
 
@@ -73,7 +78,7 @@ const JobApplicationCard = ({ job, columns = [] }: JobApplicationCardProps) => {
         console.error("Failed to delete job application: ", result.error);
       }
     } catch (error) {
-      console.error("Failed to move job application: ", error);
+      console.error("Failed to delete job application: ", error);
     }
   };
 
@@ -89,7 +94,10 @@ const JobApplicationCard = ({ job, columns = [] }: JobApplicationCardProps) => {
 
   return (
     <>
-      <Card className="cursor-pointer transition-shadow hover:shadow-lg bg-white group shadow-sm">
+      <Card
+        className="cursor-pointer transition-shadow hover:shadow-lg bg-white group shadow-sm"
+        {...dargHandleProps}
+      >
         <CardContent className="p-4">
           <div className="flex items-start justify-between gap-2">
             <div className=" flex-1 min-w-0">
