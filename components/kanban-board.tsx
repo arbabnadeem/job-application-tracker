@@ -97,7 +97,7 @@ function DroppableColumn({
   );
 
   return (
-    <Card className="flex-shrink-0 shadow-md p-0">
+    <Card className="flex-shrink-0 min-w-[250px] shadow-md p-0">
       <CardHeader
         className={`${config.color} text-white rounded-t-lg pb-3 pt-3`}
       >
